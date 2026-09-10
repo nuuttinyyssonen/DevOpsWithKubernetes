@@ -5,7 +5,7 @@ Generates a random string on startup, keeps it in memory, and logs it with a tim
 ## Run locally
 
 ​```bash
-cd Log output
+cd log_output
 node index.js
 ​```
 
