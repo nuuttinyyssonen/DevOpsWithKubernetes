@@ -15,5 +15,5 @@ docker build -t todo:latest .
 k3d image import todo:latest -c k3s-default  
 kubectl create deployment todo --image=todo:latest    
 kubectl set env deployment/todo PORT=5001  
-kubectl patch deployment todo -p '{"spec":{"template":{"spec":{"containers":[{"name":"todo","imagePullPolicy":"Never"}]}}}}'
+kubectl patch deployment todo -p '{"spec":{"template":{"spec":{"containers":[{"name":"todo","imagePullPolicy":"Never"}]}}}}'  
 kubectl get pods
