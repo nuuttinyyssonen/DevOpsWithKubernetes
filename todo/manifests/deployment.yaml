@@ -14,8 +14,7 @@ spec:
     spec:
       containers:
         - name: todo
-          image: todo:latest
-          imagePullPolicy: Never
+          image: nuuttinyyssonen/todo:latest
           env:
             - name: PORT
               value: "5001"
