@@ -24,6 +24,6 @@ kubectl get pods
 Image is pulled directly from Docker Hub: https://hub.docker.com/r/nuuttinyyssonen/todo
 
 ## Testing the deployment
-kubectl get po
-todo-c548989bf-qmdkq
-kubectl port-forward todo-c548989bf-qmdkq 5001:5001
+kubectl get po  
+todo-c548989bf-qmdkq  
+kubectl port-forward todo-c548989bf-qmdkq 5001:5001  
