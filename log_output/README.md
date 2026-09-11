@@ -11,9 +11,7 @@ node index.js
 
 ## Run in Kubernetes (k3d)
 
-​```bash
-docker build -t log-output:latest .
-k3d image import log-output:latest -c k3s-default
-kubectl apply -f deployment.yaml
-kubectl logs -f deployment/log-output
-​```
+docker build -t log-output:latest .  
+k3d image import log-output:latest -c k3s-default  
+kubectl apply -f manifests/deployment.yaml  
+kubectl logs -f deployment/log-output  
