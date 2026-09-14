@@ -20,11 +20,16 @@ kubectl get pods
 
 ## Accessing the app
 
-The app is exposed via an Ingress, routed through the cluster's load balancer (we did this last exercise).
 
-​```
-k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
-​```
+This app shares a single Ingress with the "Ping pong" application.
+The combined Ingress definition is kept here at `log_output/manifests/ingress.yaml`,
+even though it also routes traffic to the `ping-pong` app, since it originated
+as this app's Ingress before being extended to cover both.
+
+It routes:
+
+- `/` → this app
+- `/pingpong` → the "Ping pong" app
 
 it can be reached at:
 
