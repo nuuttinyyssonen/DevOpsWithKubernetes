@@ -4,7 +4,7 @@ A simple Express web server that responds to GET `/` with an HTML page, and logs
 
 ## Run locally
 
-​```bash
+​```
 npm install
 PORT=5001 node index.js
 ​```
@@ -30,13 +30,13 @@ kubectl rollout restart deployment/todo
 
 The app is exposed via a NodePort service. Cluster created with:
 
-​```bash
+​```
 k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 ​```
 
 it can be reached at:
 
-​```bash
+​```
 curl http://localhost:8082/
 ​```
 
