@@ -1,6 +1,6 @@
 # Todo app
 
-A simple Express web server that responds to GET `/` with an HTML page showing a random image from Lorem Picsum, and logs `Server started in port NNNN` on startup.
+A simple Express web server that responds to GET `/` with an HTML page showing a random image from Lorem Picsum, a placeholder input field with a "Send" button (no functionality yet), and three hardcoded todo items. NOTE HTML page's CSS styles have been made with Claude to match to the ones in course example.
 
 The image URL is cached to a file on a shared PersistentVolume and only refreshed every 10 minutes, so the same image is shown across requests within that window, and the app doesn't need to hit an external API on every page load.
 
