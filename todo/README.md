@@ -1,24 +1,32 @@
 # Todo app
 
-A simple Express web server that responds to GET `/` with an HTML page, and logs `Server started in port NNNN` on startup.
+A simple Express web server that responds to GET `/` with an HTML page showing a random image from Lorem Picsum, and logs `Server started in port NNNN` on startup.
+
+The image URL is cached to a file on a shared PersistentVolume and only refreshed every 10 minutes, so the same image is shown across requests within that window, and the app doesn't need to hit an external API on every page load.
 
 ## Run locally
 
-​```
-npm install
-PORT=5001 node index.js
-​```
+npm install  
+PORT=5001 node index.js  
+
 
 ## Run in Kubernetes (k3d)
 
 docker build -t nuuttinyyssonen/todo:latest .  
 docker push nuuttinyyssonen/todo:latest  
 kubectl apply -f manifests/deployment.yaml  
-kubectl apply -f manifests/service.yaml  
-kubectl apply -f manifests/ingress.yaml  
 kubectl get pods  
 
 Image is pulled directly from Docker Hub: https://hub.docker.com/r/nuuttinyyssonen/todo
+
+## Shared storage
+
+This app uses the same PersistentVolume shared with the "Ping pong" and "Log output" applications. The PersistentVolume and PersistentVolumeClaim definitions are kept separately, in the top-level `manifests`
+
+kubectl apply -f ../manifests/persistentvolume.yaml  
+kubectl apply -f ../manifests/persistentvolumeclaim.yaml  
+
+The image URL is written to `/usr/src/app/files/image-url.txt` on the shared volume.
 
 ## Updating after code changes
 
@@ -26,22 +34,13 @@ docker build -t nuuttinyyssonen/todo:latest .
 docker push nuuttinyyssonen/todo:latest  
 kubectl rollout restart deployment/todo  
 
-
-## Accessing the app
-
-The app is exposed via an Ingress, routed through the cluster's load balancer instead of a NodePort. Cluster created with:
-
-​```
-k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
-​```
-
-it can be reached at:
-
-​```
-curl http://localhost:8082/
-​```
-
 ## Testing / checking logs
 
 kubectl get pods  
-kubectl logs -f deployment/todo
+kubectl logs -f deployment/todo  
+
+kubectl port-forward deployment/todo 5001:5001  
+
+Then in another terminal:
+
+curl http://localhost:5001/

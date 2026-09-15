@@ -12,9 +12,16 @@ spec:
       labels:
         app: todo
     spec:
+      volumes:
+        - name: shared-files
+          persistentVolumeClaim:
+            claimName: shared-pvc
       containers:
         - name: todo
           image: nuuttinyyssonen/todo:latest
+          volumeMounts:
+            - name: shared-files
+              mountPath: /usr/src/app/files
           env:
             - name: PORT
               value: "5001"
