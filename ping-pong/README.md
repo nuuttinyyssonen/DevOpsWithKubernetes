@@ -1,6 +1,9 @@
 # Ping pong app
 
-A simple Express web server that responds to GET `/pingpong` with `pong N`, where N is a counter that increases by 1 on every request. The counter is written to a file on a shared PersistentVolume, so it survives pod restarts and is also readable by the "Log output" application.
+A simple Express web server that responds to GET `/pingpong` with `pong N`, where N is a counter that increases by 1 on every request. 
+
+The app also exposes a `/pings` endpoint that returns the current count as plain text, used by the "Log output" application to display the count over HTTP instead of a shared file.
+
 
 ## Run locally
 
@@ -15,14 +18,11 @@ kubectl apply -f manifests/deployment.yaml
 kubectl apply -f manifests/service.yaml  
 kubectl get pods  
 
-## Shared storage
+## Connecting to Log output
 
-This app shares a PersistentVolume with the "Log output" application. The PersistentVolume and PersistentVolumeClaim definitions are kept separately from either app, in the top-level `manifests` folder.
-
-kubectl apply -f ../manifests/persistentvolume.yaml  
-kubectl apply -f ../manifests/persistentvolumeclaim.yaml  
-
-The counter is written to `/usr/src/app/files/pingpong-counter.txt` on the shared volume. The "Log output" app reads this same file to display the current count alongside its own status.
+The "Log output" app calls this app's `/pings` endpoint directly over HTTP, using
+Kubernetes' internal Service DNS name (`ping-pong`), instead of reading from a shared
+PersistentVolume as in earlier exercises.
 
 ## Accessing the app
 

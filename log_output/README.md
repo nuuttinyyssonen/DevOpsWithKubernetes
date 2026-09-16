@@ -7,8 +7,10 @@ The application is split into two containers running in a single Pod, sharing a 
 - reader: a simple Express server that reads that file, along with the "Ping pong" app's
   request counter, and returns both on GET `/`.
 
-The two containers, together with the "Ping pong" app's pod, now share a PersistentVolume
-mounted at `/usr/src/app/files`, replacing the `emptyDir` volume used in earlier exercises.
+The writer and reader containers share an `emptyDir` volume mounted at `/usr/src/app/files`
+for the status file. This is separate from, and not shared with, the "Ping pong" app anymore —
+the two apps now communicate over HTTP instead of a shared PersistentVolume.
+
 
 The original single-container `index.js` at the root of this folder is kept for reference
 from earlier exercises, but is no longer used in the current deployment — the app now runs
@@ -43,17 +45,15 @@ kubectl apply -f manifests/service.yaml
 kubectl apply -f manifests/ingress.yaml  
 kubectl get pods  
 
-## Shared storage
+## Connecting to Ping pong
 
-This app shares a PersistentVolume with the "Ping pong" application. The PersistentVolume
-and PersistentVolumeClaim definitions are kept separately from either app, in the top-level
-`manifests` folder.
+The reader container calls the "Ping pong" app's own HTTP endpoint directly, using
+Kubernetes' internal Service DNS name, to get the current request count:
 
-kubectl apply -f ../manifests/persistentvolume.yaml  
-kubectl apply -f ../manifests/persistentvolumeclaim.yaml  
+http://ping-pong:4567/pings  
 
-The reader reads `/usr/src/app/files/pingpong-counter.txt`, written by the "Ping pong" app,
-in addition to its own status file, to produce a combined response like:
+No shared volume or file is used between the two apps anymore. The combined response is
+produced like:
 
 2026-09-15T09:24:32.553Z: gbwxbokwdaaovzom, Ping / Pongs: 3
 

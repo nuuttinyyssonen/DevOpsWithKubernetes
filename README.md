@@ -17,3 +17,6 @@
 - [1.11](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/1.11)
 - [1.12](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/1.12/todo)
 - [1.13](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/1.13/todo)
+
+### Chapter 3
+- [2.1](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.1)
