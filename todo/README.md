@@ -6,6 +6,8 @@ The image URL is cached to a file on a shared PersistentVolume and only refreshe
 
 Submitting the form sends a POST request to this app, which forwards the new todo to the "Todo backend" service over HTTP. The list of todos shown on the page is fetched from "Todo backend" on every page load, so newly created todos appear immediately after submitting.
 
+Todo uses namespace project  
+
 ## Run locally
 
 npm install  

@@ -2,6 +2,8 @@
 
 A simple Express web server that manages todo items in memory. Provides a GET `/todos` endpoint to fetch the current list of todos, and a POST `/todos` endpoint to create a new one. Todos are stored purely in memory, so they reset if the pod restarts. A database will replace this in a later exercise.
 
+Todo-backend uses namespace project  
+
 ## Run locally
 
 npm install  
