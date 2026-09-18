@@ -18,6 +18,11 @@ from the `writer/` and `reader/` subfolders instead, each with its own `Dockerfi
 `package.json`.
 
 Log_output uses namespace exercises  
+NOTE also fixed ingress and service files from previous exericse (2.4) to include the namespace exercises
+
+The reader also reads a ConfigMap, mounted as a volume, and prints the content of a file
+(`information.txt`) from it alongside a `MESSAGE` environment variable also sourced from
+that same ConfigMap, in addition to the usual output.
 
 ## Run locally
 

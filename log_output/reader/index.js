@@ -5,6 +5,7 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const statusFilePath = '/usr/src/app/files/status.txt';
+const infoFilePath = '/usr/src/app/config/information.txt';
 
 app.get('/', async (req, res) => {
   let status;
@@ -22,7 +23,20 @@ app.get('/', async (req, res) => {
     console.error('Failed to reach ping-pong:', err.message);
   }
 
-  res.send(`${status}, Ping / Pongs: ${count}`);
+  let fileContent;
+  try {
+    fileContent = fs.readFileSync(infoFilePath, 'utf8').trim();
+  } catch (err) {
+    fileContent = 'file not found';
+  }
+
+  const message = process.env.MESSAGE || 'not set';
+
+  res.send(
+    `file content: ${fileContent}\n` +
+    `env variable: MESSAGE=${message}\n` +
+    `${status}, Ping / Pongs: ${count}`
+  );
 });
 
 app.listen(PORT, () => {

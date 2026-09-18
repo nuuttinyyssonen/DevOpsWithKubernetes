@@ -5,6 +5,7 @@ A simple Express web server that responds to GET `/pingpong` with `pong N`, wher
 The app also exposes a `/pings` endpoint that returns the current count as plain text, used by the "Log output" application to display the count over HTTP instead of a shared file.
 
 ping-pong uses namespace exercises  
+NOTE also fixed service file from previous exericse (2.4) to include the namespace exercises  
 
 ## Run locally
 
