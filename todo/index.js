@@ -1,11 +1,14 @@
 const express = require('express');
 const fs = require('fs');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 const urlFilePath = '/usr/src/app/files/image-url.txt';
 const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
+app.use(express.urlencoded({ extended: true })); 
 
 function generateNewImageUrl() {
   const randomSeed = Math.floor(Math.random() * 1000);
@@ -20,13 +23,39 @@ if (!fs.existsSync(urlFilePath)) {
 
 setInterval(generateNewImageUrl, REFRESH_INTERVAL);
 
-app.get('/', (req, res) => {
+app.post('/todos', async (req, res) => {
+  const todo = req.body.text;
+
+  try {
+    await axios.post('http://todo-backend:2345/todos', {
+      text: todo
+    });
+  } catch (err) {
+    console.error('Failed to create todo:', err.message);
+  }
+
+  res.redirect('/');
+});
+
+app.get('/', async (req, res) => {
   let imageUrl;
   try {
     imageUrl = fs.readFileSync(urlFilePath, 'utf8').trim();
   } catch (err) {
     imageUrl = '';
   }
+
+  let todos = [];
+  try {
+    const response = await axios.get('http://todo-backend:2345/todos');
+    todos = response.data;
+  } catch (error) {
+    console.error('Failed to fetch todos:', error.message);
+  }
+
+  const todoItemsHtml = todos
+    .map(todo => `<div class="todo-item">${todo.text}</div>`)
+    .join('');
 
   res.send(`
     <!DOCTYPE html>
@@ -96,16 +125,16 @@ app.get('/', (req, res) => {
 
         ${imageUrl ? `<img src="${imageUrl}" alt="Random image" />` : '<p>Image not ready yet</p>'}
 
-        <div class="input-row">
-          <input type="text" placeholder="Enter a new todo (max 140 characters)" maxlength="140" />
-          <button>Send</button>
-        </div>
+        <form method="POST" action="/todos">
+          <div class="input-row">
+            <input type="text" name="text" placeholder="Enter a new todo (max 140 characters)" maxlength="140" />
+            <button type="submit">Send</button>
+          </div>
+        </form>
 
         <h2>Todos</h2>
         <div class="todo-list">
-          <div class="todo-item">Learn Kubernetes basics</div>
-          <div class="todo-item">Deploy application to cluster</div>
-          <div class="todo-item">Configure persistent volumes</div>
+          ${todoItemsHtml}
         </div>
       </body>
     </html>

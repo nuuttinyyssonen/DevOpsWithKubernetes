@@ -1,12 +1,11 @@
 {
-  "name": "todo-app",
+  "name": "todo-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "axios": "^1.20.0",
     "dotenv": "^17.4.2",
     "express": "^4.19.2"
   }
