@@ -21,3 +21,4 @@
 ### Chapter 3
 - [2.1](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.1)
 - [2.2](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.2/todo-backend)
+- [2.3](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.3/log_output)

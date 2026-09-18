@@ -17,6 +17,8 @@ from earlier exercises, but is no longer used in the current deployment — the 
 from the `writer/` and `reader/` subfolders instead, each with its own `Dockerfile` and
 `package.json`.
 
+Log_output uses namespace exercises  
+
 ## Run locally
 
 Writer:  
