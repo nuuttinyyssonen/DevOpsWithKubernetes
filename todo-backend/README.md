@@ -11,6 +11,27 @@ All ports, URLs, and other configuration values are passed in via a ConfigMap in
 npm install  
 PORT=3000 node index.js  
 
+## Postgres
+
+Todos are stored in a Postgres database instead of in memory, so they survive pod restarts.
+
+Postgres runs as a StatefulSet (1 replica) in the `project` namespace, backed by its own PersistentVolume and PersistentVolumeClaim, separate from the Postgres instance used by the "Ping pong" application.
+
+Before applying, the local path must exist on the node:
+
+docker exec k3d-k3s-default-agent-0 mkdir -p /tmp/postgres-todo  
+
+kubectl apply -f manifests/postgres-pv.yaml  
+kubectl apply -f manifests/postgres-pvc.yaml  
+kubectl apply -f manifests/postgres-service.yaml  
+kubectl apply -f manifests/postgres-statefulset.yaml  
+
+This app connects to it using the `pg` npm package, with connection details (`POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`) passed in via a ConfigMap (`todo-backend-config`) rather than hardcoded in the source code. On startup, it creates a `todos` table if it doesn't already exist, and reads/writes rows there instead of an in-memory array.
+
+To connect manually for debugging:
+
+kubectl run -it --rm --restart=Never --image postgres psql-for-debugging -n project --env="PGPASSWORD=mysecretpassword" -- psql -h postgres-todo -U postgres
+
 ## Run in Kubernetes (k3d)
 
 docker build -t todo-backend:latest .  

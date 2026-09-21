@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-todo
+  namespace: project
+spec:
+  serviceName: postgres-todo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-todo
+  template:
+    metadata:
+      labels:
+        app: postgres-todo
+    spec:
+      containers:
+        - name: postgres
+          image: postgres
+          env:
+            - name: POSTGRES_PASSWORD
+              value: mysecretpassword
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-todo-pvc
