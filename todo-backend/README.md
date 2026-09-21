@@ -56,3 +56,21 @@ kubectl logs -f deployment/todo-backend
 Fetch todos directly from inside the pod:
 
 kubectl exec -it <todo-backend-pod-name> -- wget -qO- http://localhost:3000/todos  
+
+## Wikipedia reminder CronJob
+
+A CronJob runs every hour and creates a new todo reminding you to read a random Wikipedia article. It fetches a random article URL from Wikipedia's `Special:Random` page, then POSTs a new todo with the text `Read <URL>` to this service's `/todos` endpoint.
+
+manifests/wikipedia-cronjob.yaml  
+
+kubectl apply -f manifests/wikipedia-cronjob.yaml  
+
+To trigger a run manually for testing, without waiting for the schedule:
+
+kubectl create job --from=cronjob/wikipedia-todo test-run -n project  
+
+Check its status and logs:
+
+kubectl get jobs -n project  
+kubectl get pods -n project  
+kubectl logs <job-pod-name> -n project
