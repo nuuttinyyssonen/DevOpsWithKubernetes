@@ -25,3 +25,4 @@
 - [2.4](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.4/todo)
 - [2.5](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.5/log_output)
 - [2.6](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.6/todo)
+- [2.7](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/2.7/ping-pong)
