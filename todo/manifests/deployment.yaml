@@ -23,6 +23,6 @@ spec:
           volumeMounts:
             - name: shared-files
               mountPath: /usr/src/app/files
-          env:
-            - name: PORT
-              value: "5001"
+          envFrom:
+            - configMapRef:
+                name: todo-config

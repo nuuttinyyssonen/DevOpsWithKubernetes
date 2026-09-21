@@ -8,6 +8,8 @@ Submitting the form sends a POST request to this app, which forwards the new tod
 
 Todo uses namespace project  
 
+All ports, URLs, and other configuration values are passed in via a ConfigMap instead of being hardcoded in the source code.  
+
 ## Run locally
 
 npm install  

@@ -5,14 +5,17 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const urlFilePath = '/usr/src/app/files/image-url.txt';
 const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+
+const urlFilePath = process.env.IMAGE_URL_FILE_PATH || '/usr/src/app/files/image-url.txt';
+const TODO_BACKEND_URL = process.env.TODO_BACKEND_URL;
+const PICSUM_BASE_URL = process.env.PICSUM_BASE_URL;
 
 app.use(express.urlencoded({ extended: true })); 
 
 function generateNewImageUrl() {
   const randomSeed = Math.floor(Math.random() * 1000);
-  const url = `https://picsum.photos/seed/${randomSeed}/1200`;
+  const url = `${PICSUM_BASE_URL}/seed/${randomSeed}/1200`;
   fs.writeFileSync(urlFilePath, url);
   console.log(`New image URL set at ${new Date().toISOString()}: ${url}`);
 }
@@ -27,7 +30,7 @@ app.post('/todos', async (req, res) => {
   const todo = req.body.text;
 
   try {
-    await axios.post('http://todo-backend:2345/todos', {
+   await axios.post(`${TODO_BACKEND_URL}/todos`, {
       text: todo
     });
   } catch (err) {
@@ -47,7 +50,7 @@ app.get('/', async (req, res) => {
 
   let todos = [];
   try {
-    const response = await axios.get('http://todo-backend:2345/todos');
+    const response = await axios.get(`${TODO_BACKEND_URL}/todos`);
     todos = response.data;
   } catch (error) {
     console.error('Failed to fetch todos:', error.message);
