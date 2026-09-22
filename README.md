@@ -37,3 +37,4 @@
 - [3.4](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.4/ping-pong)
 - [3.5](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.5/todo)
 - [3.6](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/blob/main/.github/workflows/main.yaml)
+- [3.7](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.7/.github/workflows/main.yaml)

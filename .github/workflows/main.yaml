@@ -59,24 +59,38 @@ jobs:
           location: ${{ env.GKE_ZONE }}
           project_id: ${{ env.PROJECT_ID }}
 
+      - name: Install Kustomize
+        run: |
+          curl --fail --silent --show-error --location \
+            https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh \
+            | bash
+          sudo mv kustomize /usr/local/bin/kustomize
+
       - name: Deploy project with Kustomize
         run: |
-          kubectl create namespace project --dry-run=client -o yaml | kubectl apply -f -
+          namespace="$GITHUB_REF_NAME"
+          if [[ "$namespace" == "main" ]]; then
+            namespace=project
+          fi
+
+          backend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA"
+          frontend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$GITHUB_SHA"
+
+          kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl config set-context --current --namespace="$namespace"
+
+          cd todo-backend/manifests
+          kustomize edit set namespace "$namespace"
+          kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend=$backend_image"
+          cd ../../todo/manifests
+          kustomize edit set namespace "$namespace"
+          kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo=$frontend_image"
+          cd ../..
+
           kubectl apply -k todo-backend/manifests
           kubectl apply -k todo/manifests
 
-      - name: Update Deployments to this build
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          kubectl set image deployment/todo-backend \
-            todo-backend="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG" \
-            -n project
-          kubectl set image deployment/todo \
-            todo="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$IMAGE_TAG" \
-            -n project
-
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/todo-backend -n project --timeout=180s
-          kubectl rollout status deployment/todo -n project --timeout=180s
+          kubectl rollout status deployment/todo-backend --timeout=180s
+          kubectl rollout status deployment/todo --timeout=180s
