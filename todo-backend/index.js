@@ -14,6 +14,11 @@ const pool = new Pool({
   port: 5432,
 });
 
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
+});
+
 async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS todos (
@@ -40,6 +45,7 @@ app.post('/todos', async (req, res) => {
     const { text } = req.body;
 
     if (!text || text.length > 140) {
+        console.log(`Rejected todo: length ${text ? text.length : 0} exceeds 140 character limit`);
         return res.status(400).json({ error: 'Todo text is required and must be 140 characters or fewer' });
     }
 
