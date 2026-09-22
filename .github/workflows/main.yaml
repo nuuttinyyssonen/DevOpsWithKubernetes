@@ -1,0 +1,82 @@
+name: Release application
+
+on:
+  push:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: europe-north1-a
+  REGISTRY: europe-north1-docker.pkg.dev
+  REPOSITORY: dwk-repo
+
+jobs:
+  build-publish-deploy:
+    name: Build, Publish and Deploy
+    runs-on: ubuntu-latest
+    environment: GKE_PROJECT
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Use gcloud CLI
+        run: gcloud info
+
+      - name: Configure Docker authentication
+        run: gcloud auth configure-docker "$REGISTRY" --quiet
+
+      - name: Build and push Todo images
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          backend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG"
+          frontend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$IMAGE_TAG"
+
+          docker build --platform linux/amd64 -t "$backend_image" ./todo-backend
+          docker push "$backend_image"
+
+          docker build --platform linux/amd64 -t "$frontend_image" ./todo
+          docker push "$frontend_image"
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Deploy project with Kustomize
+        run: |
+          kubectl create namespace project --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -k todo-backend/manifests
+          kubectl apply -k todo/manifests
+
+      - name: Update Deployments to this build
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl set image deployment/todo-backend \
+            todo-backend="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG" \
+            -n project
+          kubectl set image deployment/todo \
+            todo="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$IMAGE_TAG" \
+            -n project
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/todo-backend -n project --timeout=180s
+          kubectl rollout status deployment/todo -n project --timeout=180s
