@@ -6,6 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const statusFilePath = '/usr/src/app/files/status.txt';
 const infoFilePath = '/usr/src/app/config/information.txt';
+const pingPongUrl = process.env.PING_PONG_URL || 'http://ping-pong:80/pings';
 
 app.get('/', async (req, res) => {
   let status;
@@ -17,7 +18,7 @@ app.get('/', async (req, res) => {
 
   let count = '0';
   try {
-    const response = await axios.get('http://ping-pong:4567/pings');
+    const response = await axios.get(pingPongUrl);
     count = response.data;
   } catch (err) {
     console.error('Failed to reach ping-pong:', err.message);

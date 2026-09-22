@@ -49,7 +49,7 @@ PersistentVolume as in earlier exercises.
 
 ## Accessing the app
 
-This app shares an Ingress with the "Log output" application. The combined Ingress definition is in `log_output/manifests/ingress.yaml` (see that app's README for details). It routes:
+This app shares a Gateway API HTTPRoute with the "Log output" application. The shared definitions are in `manifests/gateway.yaml` and `manifests/httproute.yaml`. They route:
 
 - `/pingpong` → this app
 - `/` → the "Log output" app
@@ -83,7 +83,7 @@ docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/pi
 
 ### Deploying the application
 
-Apply the Postgres resources, the ping-pong deployment and Service, and the Ingress:
+Apply the Postgres resources, the ping-pong deployment and Service, then apply the shared Gateway and HTTPRoute:
 
 ```sh
 kubectl apply -f manifests/postgres-pv.yaml \
@@ -92,20 +92,20 @@ kubectl apply -f manifests/postgres-pv.yaml \
   -f manifests/postgres-statefulset.yaml
 kubectl apply -f manifests/gke-deployment.yaml
 kubectl apply -f manifests/service.yaml
-kubectl apply -f manifests/ingress.yaml
+kubectl apply -f ../manifests/gateway.yaml -f ../manifests/httproute.yaml
 ```
 
-The Ingress routes `/pingpong` to the ping-pong Service. The application also responds with `ok` at `/`; this is required because the GKE Ingress health check tests the Service root path.
+The HTTPRoute sends `/pingpong` to the ping-pong Service and `/` to the log-output Service. The ping-pong application also responds with `ok` at `/`, which keeps the Service independently healthy.
 
-Check the deployment and Ingress address:
+Check the deployment and Gateway address:
 
 ```sh
 kubectl get pods -n exercises
-kubectl get ingress -n exercises
+kubectl get gateway,httproute -n exercises
 ```
 
-Once the Ingress has an external IP, test the public endpoint:
+Once the Gateway has an external IP, test the public endpoint:
 
 ```sh
-curl http://<INGRESS-IP>/pingpong
+curl http://<GATEWAY-IP>/pingpong
 ```

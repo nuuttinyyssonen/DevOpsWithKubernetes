@@ -49,7 +49,6 @@ k3d image import log-output-reader:latest -c k3s-default
 cd ..  
 kubectl apply -f manifests/deployment.yaml  
 kubectl apply -f manifests/service.yaml  
-kubectl apply -f manifests/ingress.yaml  
 kubectl get pods  
 
 ## Connecting to Ping pong
@@ -57,7 +56,7 @@ kubectl get pods
 The reader container calls the "Ping pong" app's own HTTP endpoint directly, using
 Kubernetes' internal Service DNS name, to get the current request count:
 
-http://ping-pong:4567/pings  
+http://ping-pong:80/pings
 
 No shared volume or file is used between the two apps anymore. The combined response is
 produced like:
@@ -66,8 +65,8 @@ produced like:
 
 ## Accessing the app
 
-This app shares a single Ingress with the "Ping pong" application.
-The combined Ingress definition is kept here at `log_output/manifests/ingress.yaml`
+This app shares a Gateway API HTTPRoute with the "Ping pong" application.
+The shared Gateway and route definitions are kept in the repository `manifests/` directory.
 
 It routes:
 
@@ -103,19 +102,19 @@ docker build --platform linux/amd64 \
 docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-reader:latest
 ```
 
-Apply the ConfigMap, deployment, Service, and Ingress in the `exercises` namespace:
+Apply the ConfigMap, deployment, Service, Gateway, and HTTPRoute in the `exercises` namespace:
 
 ```sh
 kubectl apply -f manifests/configmap.yaml \
   -f manifests/deployment.yaml \
-  -f manifests/service.yaml \
-  -f manifests/ingress.yaml
+  -f manifests/service.yaml
+kubectl apply -f ../manifests/gateway.yaml -f ../manifests/httproute.yaml
 kubectl get pods -n exercises
-kubectl get ingress -n exercises
+kubectl get gateway,httproute -n exercises
 ```
 
-Once the Ingress has an external IP, the reader is available at its root path:
+Once the Gateway has an external IP, the reader is available at its root path:
 
 ```sh
-curl http://<INGRESS-IP>/
+curl http://<GATEWAY-IP>/
 ```
