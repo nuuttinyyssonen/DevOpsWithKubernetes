@@ -63,39 +63,49 @@ kubectl logs -f deployment/ping-pong
 
 ## Deploying to Google Kubernetes Engine (GKE)
 
-This app is also deployed to a real GKE cluster (exercise 3.1) instead of the local k3d cluster along with Postgress so everything works smoothly.
+This app can be deployed to a GKE cluster together with Postgres and the Log output application.
 
 ### Building and pushing the image to Artifact Registry
 
-Rather than Docker Hub, the image is pushed to Google's Artifact Registry, which integrates directly with GKE.
+The image is stored in Google's Artifact Registry so that GKE can pull it.
 
-One-time setup of the repository:
-
+```sh
 gcloud artifacts repositories create dwk-repo \
   --repository-format=docker \
-  --location=europe-north1  
+  --location=europe-north1
 
-gcloud auth configure-docker europe-north1-docker.pkg.dev  
+gcloud auth configure-docker europe-north1-docker.pkg.dev
 
-docker build --platform linux/amd64 -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest .  
-docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest  
+docker build --platform linux/amd64 \
+  -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest .
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest
+```
 
-### Deployment
+### Deploying the application
 
-manifests/gke-deployment.yaml is a separate file from the local `deployment.yaml`. Unlike the local version, it has no `imagePullPolicy: Never`, since the image is pulled from Artifact Registry rather than imported directly into the cluster, and it references the Artifact Registry image path instead of the local image name.
+Apply the Postgres resources, the ping-pong deployment and Service, and the Ingress:
 
-kubectl apply -f manifests/gke-deployment.yaml  
+```sh
+kubectl apply -f manifests/postgres-pv.yaml \
+  -f manifests/postgres-pvc.yaml \
+  -f manifests/postgres-service.yaml \
+  -f manifests/postgres-statefulset.yaml
+kubectl apply -f manifests/gke-deployment.yaml
+kubectl apply -f manifests/service.yaml
+kubectl apply -f manifests/ingress.yaml
+```
 
-### LoadBalancer service
+The Ingress routes `/pingpong` to the ping-pong Service. The application also responds with `ok` at `/`; this is required because the GKE Ingress health check tests the Service root path.
 
-manifests/gke-service.yaml exposes the app using a `LoadBalancer` Service instead of the local `ClusterIP` one.  
+Check the deployment and Ingress address:
 
-kubectl apply -f manifests/gke-service.yaml  
+```sh
+kubectl get pods -n exercises
+kubectl get ingress -n exercises
+```
 
-Check when the external IP has been assigned (this can take a minute or two):
+Once the Ingress has an external IP, test the public endpoint:
 
-kubectl get service ping-pong -n exercises  
-
-Once assigned, the app is reachable directly:
-
-curl http://<EXTERNAL-IP>/pingpong  
+```sh
+curl http://<INGRESS-IP>/pingpong
+```

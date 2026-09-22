@@ -28,6 +28,10 @@ async function initDb() {
 
 initDb().catch(err => console.error('Failed to initialize database:', err));
 
+app.get('/', (req, res) => {
+  res.status(200).send('ok');
+});
+
 app.get('/pingpong', async (req, res) => {
   try {
     const result = await pool.query(

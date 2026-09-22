@@ -85,3 +85,37 @@ Since the Pod now has two containers, specify which one when checking logs:
 kubectl get pods  
 kubectl logs -f deployment/log-output -c writer  
 kubectl logs -f deployment/log-output -c reader
+
+## Deploying to Google Kubernetes Engine (GKE)
+
+For GKE, build both container images for the `linux/amd64` platform and push them
+to Artifact Registry:
+
+```sh
+docker build --platform linux/amd64 \
+  -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-writer:latest \
+  ./writer
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-writer:latest
+
+docker build --platform linux/amd64 \
+  -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-reader:latest \
+  ./reader
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-reader:latest
+```
+
+Apply the ConfigMap, deployment, Service, and Ingress in the `exercises` namespace:
+
+```sh
+kubectl apply -f manifests/configmap.yaml \
+  -f manifests/deployment.yaml \
+  -f manifests/service.yaml \
+  -f manifests/ingress.yaml
+kubectl get pods -n exercises
+kubectl get ingress -n exercises
+```
+
+Once the Ingress has an external IP, the reader is available at its root path:
+
+```sh
+curl http://<INGRESS-IP>/
+```
