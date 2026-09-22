@@ -60,3 +60,42 @@ curl http://localhost:8081/pingpong
 
 kubectl get pods  
 kubectl logs -f deployment/ping-pong
+
+## Deploying to Google Kubernetes Engine (GKE)
+
+This app is also deployed to a real GKE cluster (exercise 3.1) instead of the local k3d cluster along with Postgress so everything works smoothly.
+
+### Building and pushing the image to Artifact Registry
+
+Rather than Docker Hub, the image is pushed to Google's Artifact Registry, which integrates directly with GKE.
+
+One-time setup of the repository:
+
+gcloud artifacts repositories create dwk-repo \
+  --repository-format=docker \
+  --location=europe-north1  
+
+gcloud auth configure-docker europe-north1-docker.pkg.dev  
+
+docker build --platform linux/amd64 -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest .  
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest  
+
+### Deployment
+
+manifests/gke-deployment.yaml is a separate file from the local `deployment.yaml`. Unlike the local version, it has no `imagePullPolicy: Never`, since the image is pulled from Artifact Registry rather than imported directly into the cluster, and it references the Artifact Registry image path instead of the local image name.
+
+kubectl apply -f manifests/gke-deployment.yaml  
+
+### LoadBalancer service
+
+manifests/gke-service.yaml exposes the app using a `LoadBalancer` Service instead of the local `ClusterIP` one.  
+
+kubectl apply -f manifests/gke-service.yaml  
+
+Check when the external IP has been assigned (this can take a minute or two):
+
+kubectl get service ping-pong -n exercises  
+
+Once assigned, the app is reachable directly:
+
+curl http://<EXTERNAL-IP>/pingpong  
