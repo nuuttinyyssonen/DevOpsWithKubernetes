@@ -28,11 +28,7 @@ async function initDb() {
 
 initDb().catch(err => console.error('Failed to initialize database:', err));
 
-app.get('/', (req, res) => {
-  res.status(200).send('ok');
-});
-
-app.get('/pingpong', async (req, res) => {
+async function pingPongHandler(req, res) {
   try {
     const result = await pool.query(
       'UPDATE counter SET count = count + 1 RETURNING count'
@@ -43,7 +39,10 @@ app.get('/pingpong', async (req, res) => {
     console.error('Database error:', err.message);
     res.status(500).send('Database error');
   }
-});
+}
+
+app.get('/', pingPongHandler);
+app.get('/pingpong', pingPongHandler);
 
 app.get('/pings', async (req, res) => {
   try {

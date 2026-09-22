@@ -1,6 +1,6 @@
 # Ping pong app
 
-A simple Express web server that responds to GET `/pingpong` with `pong N`, where N is a counter that increases by 1 on every request. 
+A simple Express web server that responds to GET `/` with `pong N`, where N is a counter that increases by 1 on every request. The `/pingpong` path is kept as a direct-access alias.
 
 The app also exposes a `/pings` endpoint that returns the current count as plain text, used by the "Log output" application to display the count over HTTP instead of a shared file.
 
@@ -95,7 +95,7 @@ kubectl apply -f manifests/service.yaml
 kubectl apply -f ../manifests/gateway.yaml -f ../manifests/httproute.yaml
 ```
 
-The HTTPRoute sends `/pingpong` to the ping-pong Service and `/` to the log-output Service. The ping-pong application also responds with `ok` at `/`, which keeps the Service independently healthy.
+The HTTPRoute sends `/pingpong` to the ping-pong Service and rewrites that path to `/` before forwarding the request. The `/` path is sent to the log-output Service.
 
 Check the deployment and Gateway address:
 
