@@ -55,3 +55,20 @@ kubectl port-forward deployment/todo 5001:5001
 Then in another terminal:
 
 curl http://localhost:5001/
+
+## Deploy to GKE
+
+Build and push the `linux/amd64` image to Artifact Registry, then deploy with Kustomize:
+
+```sh
+docker build --platform linux/amd64 -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo:latest .
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo:latest
+kubectl create namespace project 2>/dev/null || true
+kubectl apply -k manifests
+```
+
+The app is available at the external IP of `todo-ingress`:
+
+```sh
+kubectl get ingress todo-ingress -n project
+```

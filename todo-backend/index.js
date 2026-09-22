@@ -28,7 +28,12 @@ async function initDb() {
   `);
 }
 
-initDb().catch(err => console.error('Failed to initialize database:', err));
+async function startApp() {
+  await initDb();
+  app.listen(PORT, () => {
+    console.log(`Server started in port ${PORT}`);
+  });
+}
 
 
 app.get('/todos', async (req, res) => {
@@ -61,6 +66,7 @@ app.post('/todos', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server started in port ${PORT}`);
+startApp().catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });

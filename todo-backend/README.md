@@ -74,3 +74,14 @@ Check its status and logs:
 kubectl get jobs -n project  
 kubectl get pods -n project  
 kubectl logs <job-pod-name> -n project
+
+## Deploy to GKE
+
+Build and push the `linux/amd64` image to Artifact Registry, then deploy with Kustomize:
+
+```sh
+docker build --platform linux/amd64 -t europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend:latest .
+docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend:latest
+kubectl create namespace project 2>/dev/null || true
+kubectl apply -k manifests
+```

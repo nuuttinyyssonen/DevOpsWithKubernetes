@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:latest
-          imagePullPolicy: Never
+          image: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend:latest
+          imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: todo-backend-config

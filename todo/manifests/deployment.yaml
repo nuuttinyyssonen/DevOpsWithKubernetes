@@ -15,11 +15,11 @@ spec:
     spec:
       volumes:
         - name: shared-files
-          persistentVolumeClaim:
-            claimName: shared-pvc
+          emptyDir: {}
       containers:
         - name: todo
-          image: nuuttinyyssonen/todo:latest
+          image: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo:latest
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: shared-files
               mountPath: /usr/src/app/files
