@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: todo-db-backup
+  namespace: project
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: todo-backup-ksa
+          containers:
+            - name: todo-db-backup
+              image: google/cloud-sdk:slim
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  apt-get update
+                  apt-get install -y --no-install-recommends ca-certificates curl gnupg
+                  install -d /usr/share/postgresql-common/pgdg
+                  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+                  . /etc/os-release
+                  echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+                  apt-get update
+                  apt-get install -y --no-install-recommends postgresql-client-18
+                  rm -rf /var/lib/apt/lists/*
+                  export PGPASSWORD="$POSTGRES_PASSWORD"
+                  FILENAME="todo-backup-$(date +%Y-%m-%d_%H-%M-%S).sql"
+                  pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "/tmp/$FILENAME"
+                  gsutil cp "/tmp/$FILENAME" "gs://dwk-todo-backups-devopswithkubernetes-509407/$FILENAME"
+              env:
+                - name: POSTGRES_HOST
+                  value: postgres-todo
+                - name: POSTGRES_USER
+                  value: postgres
+                - name: POSTGRES_PASSWORD
+                  value: mysecretpassword
+                - name: POSTGRES_DB
+                  value: postgres
+          restartPolicy: OnFailure

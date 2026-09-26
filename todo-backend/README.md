@@ -85,3 +85,21 @@ docker push europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/to
 kubectl create namespace project 2>/dev/null || true
 kubectl apply -k manifests
 ```
+
+## Database backup CronJob
+
+A CronJob runs once every 24 hours, creates a `pg_dump` backup of the todo database, and uploads it to a Google Cloud Storage bucket. It authenticates to Google Cloud using Workload Identity, via a dedicated Kubernetes ServiceAccount (`todo-backup-ksa`) bound to a Google IAM service account with storage write permissions, no key file is stored in the cluster or the repository.
+
+manifests/backup-cronjob.yaml  
+
+kubectl apply -f manifests/backup-cronjob.yaml  
+
+To trigger a run manually for testing:
+
+kubectl create job --from=cronjob/todo-db-backup test-backup -n project  
+
+Check its status and logs:
+
+kubectl get jobs -n project  
+kubectl get pods -n project  
+kubectl logs <job-pod-name> -n project 
