@@ -39,3 +39,4 @@
 - [3.6](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/blob/main/.github/workflows/main.yaml)
 - [3.7](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.7/.github/workflows/main.yaml)
 - [3.8](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.8/.github/workflows/delete-environment.yaml)
+- [3.9](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.9/todo)

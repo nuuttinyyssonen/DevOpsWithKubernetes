@@ -72,3 +72,8 @@ The app is available at the external IP of `todo-ingress`:
 ```sh
 kubectl get ingress todo-ingress -n project
 ```
+
+## Exercise 3.9 DBaaS vs DIY
+Database as a service offers easy maintenance, updates, scalability and backups are usually automated with point-in-time recovery and one-click restore, which is its biggest advantage. On the downside DBaaS costs might usually be much higher and also potential risk of vendor lock-in.
+
+DIY, company has full control of the whole database and its configurations. Costs could be much more smaller compared to DBaaS. Backups must be built manually and restore procedures are easy to neglect. It requires manually provisioning storage, configuring the database, and writing your own deployment manifests meaning more upfront work.
