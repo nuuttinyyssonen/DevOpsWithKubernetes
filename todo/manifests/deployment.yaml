@@ -26,3 +26,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: todo-config
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"

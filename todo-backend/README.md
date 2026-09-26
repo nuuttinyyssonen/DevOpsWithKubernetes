@@ -103,3 +103,7 @@ Check its status and logs:
 kubectl get jobs -n project  
 kubectl get pods -n project  
 kubectl logs <job-pod-name> -n project 
+
+## Resource requests and limits
+
+CPU and memory requests/limits are set based on observed usage via `kubectl top pods`.

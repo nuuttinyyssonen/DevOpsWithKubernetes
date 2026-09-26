@@ -41,3 +41,4 @@
 - [3.8](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.8/.github/workflows/delete-environment.yaml)
 - [3.9](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.9/todo)
 - [3.10](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.10/todo-backend)
+- [3.11](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/3.11/todo)

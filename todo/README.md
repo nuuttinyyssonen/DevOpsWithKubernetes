@@ -77,3 +77,7 @@ kubectl get ingress todo-ingress -n project
 Database as a service offers easy maintenance, updates, scalability and backups are usually automated with point-in-time recovery and one-click restore, which is its biggest advantage. On the downside DBaaS costs might usually be much higher and also potential risk of vendor lock-in.
 
 DIY, company has full control of the whole database and its configurations. Costs could be much more smaller compared to DBaaS. Backups must be built manually and restore procedures are easy to neglect. It requires manually provisioning storage, configuring the database, and writing your own deployment manifests meaning more upfront work.
+
+## Resource requests and limits
+
+CPU and memory requests/limits are set based on observed usage via `kubectl top pods`.
