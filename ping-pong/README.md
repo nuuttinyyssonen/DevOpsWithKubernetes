@@ -124,3 +124,21 @@ kubectl get po -n exercises
 Ping-pong drops to `0/1` and Log output to `1/2`. Applying the StatefulSet again brings them back to `1/1` and `2/2` automatically:
 
 kubectl apply -f manifests/postgres-statefulset.yaml
+
+## CPU-based rollout analysis
+
+The Argo Rollouts AnalysisTemplate in `manifests/analysistemplate.yaml` monitors the summed five-minute CPU usage rate of containers in the `exercises` namespace. If it reaches 0.5 CPU cores, the analysis fails and the canary rollout in `manifests/rollout.yaml` is aborted, leaving the previous stable revision in place.
+
+Apply the AnalysisTemplate and Rollout, then watch rollout progress:
+
+```sh
+kubectl apply -f manifests/analysistemplate.yaml
+kubectl apply -f manifests/rollout.yaml
+kubectl argo rollouts get rollout ping-pong -n exercises --watch
+```
+
+If the standard Ping-pong Deployment is still running, remove it before applying the Rollout; both select pods labeled `app: ping-pong`:
+
+```sh
+kubectl delete deployment ping-pong -n exercises
+```
