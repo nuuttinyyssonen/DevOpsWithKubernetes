@@ -50,3 +50,4 @@
 - [4.3](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/blob/main/Exercise%204.3.png)
 - [4.4](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/4.4/ping-pong)
 - [4.5](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/4.5/todo-backend)
+- [4.6](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/4.6/broadcaster)

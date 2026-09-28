@@ -1,6 +1,6 @@
 # Todo backend
 
-A simple Express web server that manages todo items in memory. Provides a GET `/todos` endpoint to fetch the current list of todos, and a POST `/todos` endpoint to create a new one. Todos are stored purely in memory, so they reset if the pod restarts. A database will replace this in a later exercise.
+A simple Express web server that provides endpoints to list, create, and update todo items stored in Postgres. Each todo has a `text` field and a boolean `done` field.
 
 Todo-backend uses namespace project  
 
@@ -49,6 +49,10 @@ The "Todo app" frontend calls this service over HTTP, using Kubernetes' internal
 http://todo-backend:2345/todos  
 
 This service is not exposed via Ingress directl.
+
+## Publishing todo events to NATS
+
+After a todo is successfully created or updated in Postgres, the backend publishes a JSON event to the `todos.events` NATS subject. It connects to NATS using `NATS_URL`, configured in `manifests/todo-backend-config.yaml`. The `broadcaster` service subscribes to this subject and forwards events to the configured external chat webhook.
 
 ## Testing / checking logs
 

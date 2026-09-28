@@ -1,10 +1,13 @@
 const express = require('express');
 const app = express();
 const { Pool } = require('pg');
+const { connect, StringCodec } = require('nats');
 
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+const natsCodec = StringCodec();
+let natsConnection;
 
 const pool = new Pool({
   host: process.env.POSTGRES_HOST,
@@ -44,8 +47,28 @@ async function initDb() {
   `);
 }
 
+async function publishTodoEvent(action, todo) {
+  const event = {
+    action,
+    todoId: todo.id,
+    text: todo.text,
+    done: todo.done
+  };
+
+  try {
+    natsConnection.publish('todos.events', natsCodec.encode(JSON.stringify(event)));
+    await natsConnection.flush();
+  } catch (err) {
+    console.error('Failed to publish todo event:', err.message);
+  }
+}
+
 async function startApp() {
   await initDb();
+  natsConnection = await connect({
+    servers: process.env.NATS_URL || 'nats://nats:4222'
+  });
+  console.log('Connected to NATS');
   app.listen(PORT, () => {
     console.log(`Server started in port ${PORT}`);
   });
@@ -72,9 +95,10 @@ app.post('/todos', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'INSERT INTO todos (text) VALUES ($1) RETURNING id, text',
+      'INSERT INTO todos (text) VALUES ($1) RETURNING id, text, done',
       [text]
     );
+    await publishTodoEvent('created', result.rows[0]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
       console.error('Database error:', err.message);
@@ -96,6 +120,7 @@ app.put('/todos/:id', async (req, res) => {
       return res.status(404).json({ error: 'Todo not found' });
     }
 
+    await publishTodoEvent('updated', result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Database error:', err.message);

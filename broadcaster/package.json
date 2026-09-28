@@ -1,14 +1,12 @@
 {
-  "name": "todo-backend",
+  "name": "todo-broadcaster",
   "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^4.19.2",
-    "nats": "^2.29.3",
-    "pg": "^8.23.0"
+    "nats": "^2.29.3"
   }
 }
