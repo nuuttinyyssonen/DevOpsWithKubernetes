@@ -33,8 +33,14 @@ async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS todos (
       id SERIAL PRIMARY KEY,
-      text TEXT NOT NULL
+      text TEXT NOT NULL,
+      done BOOLEAN NOT NULL DEFAULT FALSE
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE todos
+    ADD COLUMN IF NOT EXISTS done BOOLEAN NOT NULL DEFAULT FALSE;
   `);
 }
 
@@ -47,33 +53,54 @@ async function startApp() {
 
 
 app.get('/todos', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT id, text FROM todos ORDER BY id');
-        res.json(result.rows);
-    } catch (err) {
-        console.error('Database error:', err.message);
-        res.status(500).json({ error: 'Failed to fetch todos' });
-    }
+  try {
+      const result = await pool.query('SELECT id, text, done FROM todos ORDER BY id');
+      res.json(result.rows);
+  } catch (err) {
+      console.error('Database error:', err.message);
+      res.status(500).json({ error: 'Failed to fetch todos' });
+  }
 });
 
 app.post('/todos', async (req, res) => {
-    const { text } = req.body;
+  const { text } = req.body;
 
-    if (!text || text.length > 140) {
-        console.log(`Rejected todo: length ${text ? text.length : 0} exceeds 140 character limit`);
-        return res.status(400).json({ error: 'Todo text is required and must be 140 characters or fewer' });
+  if (!text || text.length > 140) {
+      console.log(`Rejected todo: length ${text ? text.length : 0} exceeds 140 character limit`);
+      return res.status(400).json({ error: 'Todo text is required and must be 140 characters or fewer' });
+  }
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO todos (text) VALUES ($1) RETURNING id, text',
+      [text]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+      console.error('Database error:', err.message);
+      res.status(500).json({ error: 'Failed to save todo' });
+  }
+});
+
+app.put('/todos/:id', async (req, res) => {
+  const { id } = req.params;
+  const { done } = req.body;
+
+  try {
+    const result = await pool.query(
+      'UPDATE todos SET done = $1 WHERE id = $2 RETURNING id, text, done',
+      [done, Number(id)]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Todo not found' });
     }
 
-    try {
-        const result = await pool.query(
-        'INSERT INTO todos (text) VALUES ($1) RETURNING id, text',
-        [text]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        console.error('Database error:', err.message);
-        res.status(500).json({ error: 'Failed to save todo' });
-    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Database error:', err.message);
+    res.status(500).json({ error: 'Failed to update todo' });
+  }
 });
 
 startApp().catch(err => {

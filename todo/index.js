@@ -63,6 +63,20 @@ app.post('/todos', async (req, res) => {
   res.redirect('/');
 });
 
+app.post('/update/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+   await axios.put(`${TODO_BACKEND_URL}/todos/${id}`, {
+      done: true
+    });
+  } catch (err) {
+    console.error('Failed to mark todo as done:', err.message);
+  }
+
+  res.redirect('/');
+});
+
 app.get('/', async (req, res) => {
   let imageUrl;
   try {
@@ -80,7 +94,14 @@ app.get('/', async (req, res) => {
   }
 
   const todoItemsHtml = todos
-    .map(todo => `<div class="todo-item">${todo.text}</div>`)
+    .map(todo => `<div class="todo-item">
+                    <p>${todo.text}</p>
+                    ${todo.done
+                      ? '<p>Done</p>'
+                      : `<form method="POST" action="/update/${todo.id}">
+                          <button type="submit">Mark as done</button>
+                        </form>`}
+                  </div>`)
     .join('');
 
   res.send(`

@@ -8,7 +8,9 @@ Submitting the form sends a POST request to this app, which forwards the new tod
 
 Todo uses namespace project  
 
-All ports, URLs, and other configuration values are passed in via a ConfigMap instead of being hardcoded in the source code.  
+All ports, URLs, and other configuration values are passed in via a ConfigMap instead of being hardcoded in the source code. 
+
+(Exercise 4.5) Added route for updating todo's done value. Todos are conditional rendered based on the done value. If done is not true, todo will have a button "mark as done" to change the value. 
 
 ## Run locally
 

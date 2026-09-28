@@ -4,7 +4,9 @@ A simple Express web server that manages todo items in memory. Provides a GET `/
 
 Todo-backend uses namespace project  
 
-All ports, URLs, and other configuration values are passed in via a ConfigMap instead of being hardcoded in the source code.  
+All ports, URLs, and other configuration values are passed in via a ConfigMap instead of being hardcoded in the source code. 
+
+(Exercise 4.5) Altered database schema to include done field and made new PUT route to changes todos in database based on the id.
 
 ## Run locally
 
