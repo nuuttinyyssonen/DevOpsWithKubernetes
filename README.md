@@ -47,3 +47,4 @@
 ### Chapter 5
 - [4.1](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/4.1/ping-pong)
 - [4.2](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/tree/4.2/todo)
+- [4.3](https://github.com/nuuttinyyssonen/DevOpsWithKubernetes/blob/main/Exercise%204.3.png)
