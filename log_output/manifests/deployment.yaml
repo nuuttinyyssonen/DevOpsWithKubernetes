@@ -24,6 +24,7 @@ spec:
               mountPath: /usr/src/app/files
         - name: reader
           image: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/log-output-reader:latest
+          imagePullPolicy: Always
           volumeMounts:
             - name: shared-files
               mountPath: /usr/src/app/files
@@ -32,3 +33,9 @@ spec:
               value: "3000"
             - name: PING_PONG_URL
               value: "http://ping-pong:80/pings"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5

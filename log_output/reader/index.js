@@ -40,6 +40,15 @@ app.get('/', async (req, res) => {
   );
 });
 
+app.get('/healthz', async (req, res) => {
+  try {
+      await axios.get(process.env.PING_PONG_URL, { timeout: 2000 });
+    res.status(200).send('ok');
+  } catch (err) {
+    res.status(500).send('ping-pong not available');
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server started in port ${PORT}`);
 });

@@ -15,8 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ping-pong:latest
-          imagePullPolicy: Never
+          image: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/ping-pong:latest
           env:
             - name: PORT
               value: "3000"
@@ -28,3 +27,9 @@ spec:
               value: "mysecretpassword"
             - name: POSTGRES_DB
               value: "postgres"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5

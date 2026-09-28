@@ -109,3 +109,18 @@ Once the Gateway has an external IP, test the public endpoint:
 ```sh
 curl http://<GATEWAY-IP>/pingpong
 ```
+
+## Readiness probes
+
+Ping-pong has a readiness probe on `/healthz` that only succeeds when the app can connect to the Postgres database, so the pod stays `0/1` until the database is available.
+
+The Log output reader has a readiness probe on its own `/healthz`, which calls the Ping-pong `/pings` endpoint. It only becomes ready when it can receive data from Ping-pong, so the pod stays `1/2` while Ping-pong is unavailable. The writer container has no probe.
+
+To test, delete the database StatefulSet and check the pod states:
+
+kubectl delete statefulset postgres -n exercises  
+kubectl get po -n exercises  
+
+Ping-pong drops to `0/1` and Log output to `1/2`. Applying the StatefulSet again brings them back to `1/1` and `2/2` automatically:
+
+kubectl apply -f manifests/postgres-statefulset.yaml

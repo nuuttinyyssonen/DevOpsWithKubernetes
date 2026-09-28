@@ -12,21 +12,22 @@ const pool = new Pool({
   port: 5432,
 });
 
-async function initDb() {
+let dbReady = false;
+
+async function ensureDb() {
+  if (dbReady) return;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS counter (
       id SERIAL PRIMARY KEY,
       count INTEGER NOT NULL
     );
   `);
-
   const result = await pool.query('SELECT * FROM counter LIMIT 1');
   if (result.rows.length === 0) {
     await pool.query('INSERT INTO counter (count) VALUES (0)');
   }
+  dbReady = true;
 }
-
-initDb().catch(err => console.error('Failed to initialize database:', err));
 
 async function pingPongHandler(req, res) {
   try {
@@ -51,6 +52,15 @@ app.get('/pings', async (req, res) => {
   } catch (err) {
     console.error('Database error:', err.message);
     res.status(500).send('Database error');
+  }
+});
+
+app.get('/healthz', async (req, res) => {
+  try {
+    await ensureDb();
+    res.status(200).send('ok');
+  } catch (err) {
+    res.status(500).send('database not ready');
   }
 });
 
