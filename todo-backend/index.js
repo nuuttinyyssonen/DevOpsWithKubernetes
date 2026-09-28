@@ -12,6 +12,16 @@ const pool = new Pool({
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   port: 5432,
+  connectionTimeoutMillis: 2000
+});
+
+app.get('/healthz', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    res.status(500).json({ status: 'database not available' });
+  }
 });
 
 app.use((req, res, next) => {

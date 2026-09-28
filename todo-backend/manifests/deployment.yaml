@@ -27,3 +27,9 @@ spec:
             limits:
               cpu: "100m"
               memory: "64Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5

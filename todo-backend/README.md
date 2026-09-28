@@ -107,3 +107,13 @@ kubectl logs <job-pod-name> -n project
 ## Resource requests and limits
 
 CPU and memory requests/limits are set based on observed usage via `kubectl top pods`.
+
+## Health checks
+
+todo-backend has a readiness probe on `/healthz`, which succeeds only when it can query the Postgres database.
+
+The Todo app has two probes. The readiness probe on `/ready` succeeds only when todo-backend is reachable, so the pod stays `0/1` while the backend or database is unavailable. The liveness probe on `/healthz` reflects an in-app flag.
+
+The "Break the app" button sets that flag to false, so the liveness probe fails, and Kubernetes restarts the container. After the restart the app is healthy again.
+
+kubectl get po -n project --watch

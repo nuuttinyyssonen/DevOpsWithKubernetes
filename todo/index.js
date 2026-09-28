@@ -13,6 +13,8 @@ const PICSUM_BASE_URL = process.env.PICSUM_BASE_URL;
 
 app.use(express.urlencoded({ extended: true })); 
 
+let isHealthy = true;
+
 function generateNewImageUrl() {
   const randomSeed = Math.floor(Math.random() * 1000);
   const url = `${PICSUM_BASE_URL}/seed/${randomSeed}/1200`;
@@ -25,6 +27,27 @@ if (!fs.existsSync(urlFilePath)) {
 }
 
 setInterval(generateNewImageUrl, REFRESH_INTERVAL);
+
+app.post('/break', (req, res) => {
+  isHealthy = false;
+  res.status(500).send('App marked unhealthy. Kubernetes should restart this container.');
+});
+
+app.get('/ready', async (req, res) => {
+  try {
+    await axios.get(`${process.env.TODO_BACKEND_URL}/healthz`, { timeout: 2000 });
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    res.status(500).json({ status: 'backend not available' });
+  }
+});
+
+app.get('/healthz', (req, res) => {
+  if (!isHealthy) {
+    return res.status(500).json({ status: 'unhealthy' });
+  }
+  return res.status(200).json({ status: 'ok' });
+});
 
 app.post('/todos', async (req, res) => {
   const todo = req.body.text;
@@ -133,6 +156,10 @@ app.get('/', async (req, res) => {
             <input type="text" name="text" placeholder="Enter a new todo (max 140 characters)" maxlength="140" />
             <button type="submit">Send</button>
           </div>
+        </form>
+
+        <form method="POST" action="/break">
+          <button type="submit">Break the app</button>
         </form>
 
         <h2>Todos</h2>
