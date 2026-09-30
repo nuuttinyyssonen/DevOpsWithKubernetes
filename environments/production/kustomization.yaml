@@ -4,17 +4,20 @@ kind: Kustomization
 namespace: production
 
 resources:
-  - ../../todo/manifests
-  - ../../todo-backend/manifests
-  - ../../todo-backend/manifests/backup-cronjob.yaml
-  - ../../broadcaster/manifests
-  - ../nats.yaml
-  - backup-serviceaccount.yaml
+- ../../todo/manifests
+- ../../todo-backend/manifests
+- ../../todo-backend/manifests/backup-cronjob.yaml
+- ../../broadcaster/manifests
+- ../nats.yaml
+- backup-serviceaccount.yaml
 
 images:
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
-    newTag: done-v1
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
-    newTag: nats-v1
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
-    newTag: latest
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
+  newTag: 78ace146132bad75409e60e5c129718c8b6dfba1
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
+  newTag: 78ace146132bad75409e60e5c129718c8b6dfba1
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
+  newTag: 78ace146132bad75409e60e5c129718c8b6dfba1
