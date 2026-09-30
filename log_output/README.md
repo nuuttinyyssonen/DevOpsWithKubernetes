@@ -133,3 +133,16 @@ kubectl get po -n exercises
 Ping-pong drops to `0/1` and Log output to `1/2`. Applying the StatefulSet again brings them back to `1/1` and `2/2` automatically:
 
 kubectl apply -f manifests/postgres-statefulset.yaml
+
+## GitOps with Argo CD
+
+The Argo CD Application at `argocd/log-output-application.yaml` watches the `main` branch and the `log_output/manifests` path, then syncs those resources to the `exercises` namespace. Changes committed and pushed to that path are applied automatically.
+
+Check sync status and watch the workload:
+
+```sh
+kubectl get application log-output -n argocd
+kubectl get pods -n exercises -l app=log-output -w
+```
+
+Argo CD applies Kubernetes manifests; it does not build container images. For application code changes, build and push a new image and commit the updated image reference in the Deployment manifest.
