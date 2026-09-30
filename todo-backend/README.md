@@ -138,3 +138,6 @@ kubectl get pods -n project -l app=todo-backend -w
 ```
 
 Argo CD applies manifests; GitHub Actions builds and pushes the container images.
+
+# NOTE FOR THE INSTRUCTOR ABOUT Exercise 4.9
+Most of the solution and debugging was done with co-pilot for exercise 4.9. I think it was easily the most complex exercise so far, so the returned assignment might be a bit all over the place and nowhere near perfect.   

@@ -1,5 +1,8 @@
 # Project environments
 
+# NOTE FOR THE INSTRUCTOR
+Most of the solution and debugging was done with co-pilot for exercise 4.9. I think it was easily the most complex exercise so far, so the returned assignment might be a bit all over the place and nowhere near perfect.   
+
 The Todo project has two isolated Argo CD environments:
 
 - `staging` watches `main` and runs the broadcaster with `LOG_ONLY=true`. It has its own Postgres PVC and NATS broker and does not include the database backup CronJob.
