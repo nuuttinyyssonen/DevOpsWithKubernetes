@@ -9,4 +9,7 @@ resources:
   - postgres-service.yaml
   - postgres-statefulset.yaml
   - wikipedia-cronjob.yaml
-  
+
+images:
+  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
+    newTag: nats-v1

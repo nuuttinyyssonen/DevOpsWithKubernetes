@@ -1,22 +1,31 @@
-name: Release application
+name: Build project images
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - todo/Dockerfile
+      - todo/index.js
+      - todo/package.json
+      - todo/package-lock.json
+      - todo-backend/Dockerfile
+      - todo-backend/index.js
+      - todo-backend/package.json
+      - todo-backend/package-lock.json
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: dwk-cluster
-  GKE_ZONE: europe-north1-a
   REGISTRY: europe-north1-docker.pkg.dev
   REPOSITORY: dwk-repo
 
 jobs:
-  build-publish-deploy:
-    name: Build, Publish and Deploy
+  build-and-update-manifests:
+    name: Build images and update Git manifests
     runs-on: ubuntu-latest
     environment: GKE_PROJECT
 
@@ -32,9 +41,6 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
-
-      - name: Use gcloud CLI
-        run: gcloud info
 
       - name: Configure Docker authentication
         run: gcloud auth configure-docker "$REGISTRY" --quiet
@@ -52,13 +58,6 @@ jobs:
           docker build --platform linux/amd64 -t "$frontend_image" ./todo
           docker push "$frontend_image"
 
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_ZONE }}
-          project_id: ${{ env.PROJECT_ID }}
-
       - name: Install Kustomize
         run: |
           curl --fail --silent --show-error --location \
@@ -66,31 +65,23 @@ jobs:
             | bash
           sudo mv kustomize /usr/local/bin/kustomize
 
-      - name: Deploy project with Kustomize
+      - name: Update image tags in Git
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          namespace="$GITHUB_REF_NAME"
-          if [[ "$namespace" == "main" ]]; then
-            namespace=project
-          fi
-
-          backend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$GITHUB_SHA"
-          frontend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$GITHUB_SHA"
-
-          kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f -
-          kubectl config set-context --current --namespace="$namespace"
+          backend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG"
+          frontend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$IMAGE_TAG"
 
           cd todo-backend/manifests
-          kustomize edit set namespace "$namespace"
           kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend=$backend_image"
           cd ../../todo/manifests
-          kustomize edit set namespace "$namespace"
           kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo=$frontend_image"
           cd ../..
 
-          kubectl apply -k todo-backend/manifests
-          kubectl apply -k todo/manifests
-
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/todo-backend --timeout=180s
-          kubectl rollout status deployment/todo --timeout=180s
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add todo-backend/manifests/kustomization.yaml todo/manifests/kustomization.yaml
+          if ! git diff --cached --quiet; then
+            git commit -m "Update project images to $IMAGE_TAG"
+            git push origin HEAD:main
+          fi

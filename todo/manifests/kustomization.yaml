@@ -6,3 +6,7 @@ resources:
   - service.yaml
   - configmap.yaml
   - ingress.yaml
+
+images:
+  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
+    newTag: done-v1
