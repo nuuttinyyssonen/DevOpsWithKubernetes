@@ -93,3 +93,18 @@ The Todo app has two probes. The readiness probe on `/ready` succeeds only when 
 The "Break the app" button sets that flag to false, so the liveness probe fails, and Kubernetes restarts the container. After the restart the app is healthy again.
 
 kubectl get po -n project --watch
+
+## GitOps with Argo CD
+
+The Argo CD Application in `argocd/todo-application.yaml` watches `main` at `todo/manifests` and syncs it to the `project` namespace. The Todo backend has its own Application, so the frontend and backend are reconciled independently.
+
+When code under `todo/` or `todo-backend/` is committed to `main`, GitHub Actions builds and pushes SHA-tagged images, then commits the updated image tags to the Kustomize manifests. Argo CD sees that commit and deploys the new images.
+
+Check synchronization and watch the frontend pods:
+
+```sh
+kubectl get application todo -n argocd
+kubectl get pods -n project -l app=todo -w
+```
+
+Argo CD applies manifests; GitHub Actions builds and pushes the container images.
