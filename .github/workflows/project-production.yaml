@@ -1,29 +1,16 @@
-name: Deploy project to staging
+name: Deploy project to production
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - todo/Dockerfile
-      - todo/index.js
-      - todo/package.json
-      - todo/package-lock.json
-      - todo-backend/Dockerfile
-      - todo-backend/index.js
-      - todo-backend/package.json
-      - todo-backend/package-lock.json
-      - broadcaster/Dockerfile
-      - broadcaster/index.js
-      - broadcaster/package.json
-      - broadcaster/package-lock.json
+    tags:
+      - "**"
 
 permissions:
   contents: write
   id-token: write
 
 concurrency:
-  group: project-staging
+  group: project-production
   cancel-in-progress: false
 
 env:
@@ -32,13 +19,13 @@ env:
   REPOSITORY: dwk-repo
 
 jobs:
-  build-and-update-manifests:
-    name: Build images and update Git manifests
+  build-and-promote:
+    name: Build tagged images and promote production
     runs-on: ubuntu-latest
     environment: GKE_PROJECT
 
     steps:
-      - name: Checkout
+      - name: Checkout tagged commit
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -55,7 +42,7 @@ jobs:
       - name: Configure Docker authentication
         run: gcloud auth configure-docker "$REGISTRY" --quiet
 
-      - name: Build and push Todo images
+      - name: Build and push tagged images
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
@@ -79,26 +66,34 @@ jobs:
             | bash
           sudo mv kustomize /usr/local/bin/kustomize
 
-      - name: Update staging image tags in Git
+      - name: Promote tagged images on production branch
         env:
           IMAGE_TAG: ${{ github.sha }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          git fetch origin main
+          if git ls-remote --exit-code --heads origin production >/dev/null 2>&1; then
+            git fetch origin production
+            git checkout -B production origin/production
+            git merge --ff-only "$GITHUB_SHA"
+          else
+            git checkout -b production "$GITHUB_SHA"
+          fi
+
           backend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend:$IMAGE_TAG"
           frontend_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/todo:$IMAGE_TAG"
           broadcaster_image="$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster:$IMAGE_TAG"
 
-          cd environments/staging
+          cd environments/production
           kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo=$frontend_image"
           kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/todo-backend=$backend_image"
           kustomize edit set image "$REGISTRY/$PROJECT_ID/$REPOSITORY/broadcaster=$broadcaster_image"
-
           cd ../..
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add environments/staging/kustomization.yaml
+          git add environments/production/kustomization.yaml
           if ! git diff --cached --quiet; then
-            git commit -m "Update staging images to $IMAGE_TAG"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
+            git commit -m "Promote project release $RELEASE_TAG to production"
+            git push origin production
           fi

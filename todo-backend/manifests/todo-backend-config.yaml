@@ -7,6 +7,5 @@ data:
   PORT: "3000"
   POSTGRES_HOST: postgres-todo
   POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: mysecretpassword
   POSTGRES_DB: postgres
   NATS_URL: nats://nats:4222

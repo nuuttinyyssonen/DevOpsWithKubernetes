@@ -17,6 +17,12 @@ spec:
         - name: todo-backend
           image: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend:latest
           imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: todo-postgres
+                  key: POSTGRES_PASSWORD
           envFrom:
             - configMapRef:
                 name: todo-backend-config

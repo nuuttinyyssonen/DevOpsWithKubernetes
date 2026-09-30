@@ -2,11 +2,12 @@ const { connect, StringCodec } = require('nats');
 
 const NATS_URL = process.env.NATS_URL || 'nats://nats:4222';
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
+const LOG_ONLY = process.env.LOG_ONLY === 'true';
 const SUBJECT = 'todos.events';
 const QUEUE_GROUP = 'todo-broadcasters';
 const codec = StringCodec();
 
-if (!WEBHOOK_URL) {
+if (!LOG_ONLY && !WEBHOOK_URL) {
   throw new Error('WEBHOOK_URL must be set');
 }
 
@@ -26,6 +27,11 @@ async function main() {
   for await (const message of subscription) {
     try {
       const event = JSON.parse(codec.decode(message.data));
+      if (LOG_ONLY) {
+        console.log(`Staging todo event: ${JSON.stringify(event)}`);
+        continue;
+      }
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
