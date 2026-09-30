@@ -4,37 +4,40 @@ kind: Kustomization
 namespace: staging
 
 resources:
-  - ../../todo/manifests
-  - ../../todo-backend/manifests
-  - ../../broadcaster/manifests
-  - ../nats.yaml
+- ../../todo/manifests
+- ../../todo-backend/manifests
+- ../../broadcaster/manifests
+- ../nats.yaml
 
 patches:
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
       name: broadcaster
-    patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: broadcaster
-      spec:
-        template:
-          spec:
-            containers:
-              - name: broadcaster
-                env:
-                  - name: LOG_ONLY
-                    value: "true"
-                  - name: WEBHOOK_URL
-                    $patch: delete
+    spec:
+      template:
+        spec:
+          containers:
+            - name: broadcaster
+              env:
+                - name: LOG_ONLY
+                  value: "true"
+                - name: WEBHOOK_URL
+                  $patch: delete
+  target:
+    group: apps
+    kind: Deployment
+    name: broadcaster
+    version: v1
 
 images:
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
-    newTag: done-v1
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
-    newTag: nats-v1
-  - name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
-    newTag: latest
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/broadcaster
+  newTag: 29a4589092fb81778395c9e2f8ab2c899069e2d4
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo
+  newTag: 29a4589092fb81778395c9e2f8ab2c899069e2d4
+- name: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
+  newName: europe-north1-docker.pkg.dev/devopswithkubernetes-509407/dwk-repo/todo-backend
+  newTag: 29a4589092fb81778395c9e2f8ab2c899069e2d4
